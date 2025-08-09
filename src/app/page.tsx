@@ -8,6 +8,7 @@ interface Timer {
 }
 
 export default function Home() {
+  const isTimerOn = useRef(false);
   const [timer, setTimer] = useState<Timer>({
     hours: 0,
     minutes: 0,
@@ -17,7 +18,8 @@ export default function Home() {
   const TIMER = useRef<NodeJS.Timeout>(null);
 
   const startTimer = () => {
-    TIMER.current = setInterval(() => {
+    if(!isTimerOn.current){
+      TIMER.current = setInterval(() => {
       setTimer((prev) => {
         let { seconds, minutes, hours } = prev;
         seconds += 1;
@@ -30,19 +32,26 @@ export default function Home() {
         }
         return { seconds, minutes, hours };
       });
-    }, 1000);
+      }, 1000);
+      isTimerOn.current = true
+    }
   };
   const pauseTimer = () => {
     clearInterval(TIMER.current!);
+    isTimerOn.current = false;
   };
 
   const resetTimer = () => {
     clearInterval(TIMER.current!);
+    isTimerOn.current = false;
     setTimer({ hours: 0, minutes: 0, seconds: 0 });
   };
 
   useEffect(() => {
-    return () => clearInterval(TIMER.current!);
+    return () => {
+      clearInterval(TIMER.current!);
+      isTimerOn.current = false;
+    }
   }, []);
 
   return (
